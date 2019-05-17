@@ -1,19 +1,18 @@
-﻿### Guia SSOAuth - Keycloak Single Sign-On MVC .NET Framework 4.7 ###
+﻿### Guia Sanepar.SSOAuth - Keycloak Single Sign-On Sanepar MVC .NET Framework 4.7 ###
 
-Biblioteca criada para facilitar a implementação da autenticação Single Sign-On utilizando Keycloak
+Biblioteca criada para facilitar a implementação da autenticação Single Sign-On utilizando Keycloak, adotado pela Sanepar.
 
 ### Configuração ###
 
 Criar as seguintes entradas no web.config da aplicação dentro de <appSettings> substituindo os dados do atributo value com dados válidos.
 
-```xml
 <appSettings>
 	<add key="SSO.Realm" value="exemplo-realm" />
     <add key="SSO.ClientID" value="exemplo-app" />
-    <add key="SSO.KeycloakUrl" value="https://servidor.com.br:8543/auth/" />
+    <add key="SSO.KeycloakUrl" value="https://servidor.sanepar.com.br:8543/auth/" />
     <add key="SSO.PersistentAuthType" value="keycloak_cookie" />
+	<add key="PostLogoutRedirectUrl" value="http://https://servidor.sanepar.com.br:8543/auth/realms/{exemplo-realm}/protocol/openid-connect/logout?redirect_uri=encodedRedirectUri" />
 </appSettings>
-```
 
 Em seguida deve-se adicionar o atributo [Authorize] sob o controller ou actions que se deseja autenticar.
 
@@ -23,6 +22,19 @@ Em seguida deve-se adicionar o atributo [Authorize] sob o controller ou actions 
 - protected void HandleUnauthorizedRequest(AuthorizationContext filterContext);
 
 Desta forma, é feita a verificação correta das roles criadas para o sistema e o correto redirecionamento para a página de acesso negado.
+
+Para logout deve ser implementado uma action com o seguinte código:
+
+```csharp
+Request.GetOwinContext()
+                .Authentication
+                .SignOut(HttpContext
+                        .GetOwinContext()
+                        .Authentication
+                        .GetAuthenticationTypes()
+                        .Select(o => o.AuthenticationType).ToArray());
+```
+Ou utilizado a url configurada no web.config <PostLogoutRedirectUrl>.
 
 ### Extra ###
 
